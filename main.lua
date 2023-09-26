@@ -4,8 +4,8 @@ List = require('list')
 
 function love.load()
     local _, _, flags = love.window.getMode()
-    width, height = love.window.getDesktopDimensions(flags.display)
-    love.window.setMode(width, height)
+    Width, Height = love.window.getDesktopDimensions(flags.display)
+    love.window.setMode(Width, Height)
 
     -- cat = {
     --     img = love.graphics.newImage('cheesecat.jpg'),
@@ -27,8 +27,11 @@ function love.load()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    if key == 'q' then
+    if key == 'q' or key == 'escape' then
         love.event.quit()
+    end
+    if key == 'e' then
+        Circles.remove(0)
     end
 end
 
@@ -61,16 +64,16 @@ function handleBounds(obj)
         obj.x = 0
         obj.v_x = (-1/obj.mass) * obj.v_x
     end
-    if obj.x+obj.radius > width then
-        obj.x = width-obj.radius
+    if obj.x+obj.radius > Width then
+        obj.x = Width-obj.radius
         obj.v_x = (-1/obj.mass) * obj.v_x
     end
     if obj.y < 0 then
         obj.y = 0
         obj.v_y = (-1/obj.mass) * obj.v_y
     end
-    if obj.y > height-obj.radius then
-        obj.y = height-obj.radius
+    if obj.y > Height-obj.radius then
+        obj.y = Height-obj.radius
         obj.v_y = (-1/obj.mass) * obj.v_y
     end
 end

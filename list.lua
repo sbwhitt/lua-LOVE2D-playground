@@ -1,15 +1,23 @@
 local list = {}
 
 function list.new()
-    local res = {}
-    res.length = 0
-    res.items = {}
-    res.add = function (item)
+    local l = {}
+    l.length = 0
+    l.items = {}
+    l.add = function (item)
             if item == nil then return nil end
-            res.items[res.length] = item
-            res.length = res.length + 1
+            l.items[l.length] = item
+            l.length = l.length + 1
         end
-    return res
+    l.remove = function (index)
+            if index < 0 or index >= l.length then return nil end
+            l.items[index] = nil
+            for i = index, l.length-2, 1 do
+                l.items[i] = l.items[i+1]
+            end
+            l.length = l.length - 1
+        end
+    return l
 end
 
 return list

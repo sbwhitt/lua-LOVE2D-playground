@@ -17,6 +17,12 @@ function list.new()
             end
             l.length = l.length - 1
         end
+    l.clear = function()
+            for i = 0, l.length, 1 do
+                l.items[i] = nil
+            end
+            l.length = 0
+        end
     return l
 end
 

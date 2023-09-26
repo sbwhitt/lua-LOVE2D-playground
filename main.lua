@@ -1,37 +1,38 @@
 if arg[#arg] == "vsc_debug" then require("lldebugger").start() end
 
 List = require('list')
+Input = require('input')
+Alpha = require('alpha')
 
 function love.load()
     local _, _, flags = love.window.getMode()
     Width, Height = love.window.getDesktopDimensions(flags.display)
     love.window.setMode(Width, Height)
 
-    -- cat = {
-    --     img = love.graphics.newImage('cheesecat.jpg'),
-    --     x = 0,
-    --     y = 0
-    -- }
-
-    Circles = List.new()
-    for i = 0, 10, 1 do
-        Circles.add({
-            radius = 10 + i,
-            mass = (10 + i) / 5,
-            x = 10 + (i * 40),
-            y = 10,
-            v_x = 0,
-            v_y = i * 0.5
-        })
-    end
+    Letters = List.new()
 end
 
 function love.keypressed(key, scancode, isrepeat)
+    if key == 'return' then
+        Input.toggle()
+        if Input.active then Letters.clear() end
+        return
+    end
+    if Input.active and Alpha[key] then
+        Letters.add({
+            char = Alpha[key],
+            radius = 16,
+            mass = 2,
+            x = 10 + Input.length * 10,
+            y = 10,
+            v_x = 0,
+            v_y = Input.length / 2
+        })
+        Input.add()
+        return
+    end
     if key == 'q' or key == 'escape' then
         love.event.quit()
-    end
-    if key == 'e' then
-        Circles.remove(0)
     end
 end
 
@@ -50,7 +51,7 @@ function handleMoveXY(obj, amount)
     end
 end
 
-function handleGrav(obj, amount)
+function applyAccY(obj, amount)
     obj.v_y = obj.v_y + amount
 end
 
@@ -79,19 +80,23 @@ function handleBounds(obj)
 end
 
 function love.update(dt)
-    for i = 0, Circles.length-1, 1 do
-        local c = Circles.items[i]
-        handleMoveXY(c, 0.5)
-        handleGrav(c, 0.1)
-        applyVelocity(c)
-        handleBounds(c)
+    if Input.active then return end
+    for i = 0, Letters.length-1, 1 do
+        local l = Letters.items[i]
+        -- w, a ,s, d controls
+        handleMoveXY(l, 0.5)
+        -- gravity
+        applyAccY(l, 0.3)
+        applyVelocity(l)
+        handleBounds(l)
     end
 end
 
 function love.draw()
-    -- love.graphics.draw(cat.img, cat.x, cat.y)
-    for i = 0, Circles.length-1, 1 do
-        local c = Circles.items[i]
-        love.graphics.circle('fill', c.x, c.y, c.radius)
+    for i = 0, Letters.length-1, 1 do
+        local l = Letters.items[i]
+        love.graphics.print(l.char, l.x, l.y)
     end
+
+    if Input.active then love.graphics.print('inputting', Width/2, Height/2) end
 end

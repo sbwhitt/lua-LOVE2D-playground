@@ -98,7 +98,6 @@ end
 function love.draw()
     for i = 0, Letters.length-1, 1 do
         local l = Letters.items[i]
-        local color = Colors.random()
         love.graphics.print(l.val, l.x, l.y)
     end
 

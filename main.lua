@@ -1,8 +1,11 @@
 if arg[#arg] == "vsc_debug" then require("lldebugger").start() end
 
+math.randomseed(os.clock())
+
 List = require('list')
 Input = require('input')
 Alpha = require('alpha')
+Colors = require('colors')
 
 function love.load()
     local _, _, flags = love.window.getMode()
@@ -20,13 +23,13 @@ function love.keypressed(key, scancode, isrepeat)
     end
     if Input.active and Alpha[key] then
         Letters.add({
-            char = Alpha[key],
+            val = Alpha[key],
             radius = 16,
-            mass = 2,
+            mass = math.random(2, 5),
             x = 10 + Input.length * 10,
             y = 10,
             v_x = 0,
-            v_y = Input.length / 2
+            v_y = math.random()
         })
         Input.add()
         return
@@ -95,7 +98,8 @@ end
 function love.draw()
     for i = 0, Letters.length-1, 1 do
         local l = Letters.items[i]
-        love.graphics.print(l.char, l.x, l.y)
+        local color = Colors.random()
+        love.graphics.print(l.val, l.x, l.y)
     end
 
     if Input.active then love.graphics.print('inputting', Width/2, Height/2) end

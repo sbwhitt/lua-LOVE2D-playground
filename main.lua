@@ -16,26 +16,19 @@ function love.load()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    if key == 'return' then
-        Input.toggle()
-        if Input.active then Letters.clear() end
-        return
+    if key == 'escape' then
+        love.event.quit()
     end
-    if Input.active and Alpha[key] then
+    if Alpha[key] then
         Letters.add({
             val = Alpha[key],
             radius = 16,
             mass = math.random(2, 5),
-            x = 10 + Input.length * 10,
+            x = math.random(10, Width - 10),
             y = 10,
-            v_x = 0,
+            v_x = math.random(),
             v_y = math.random()
         })
-        Input.add()
-        return
-    end
-    if key == 'q' or key == 'escape' then
-        love.event.quit()
     end
 end
 
@@ -63,6 +56,18 @@ function applyVelocity(obj)
     obj.y = obj.y + obj.v_y
 end
 
+-- function addRandLetter(key)
+--     Letters.add({
+--         val = Alpha[key],
+--         radius = 16,
+--         mass = math.random(2, 5),
+--         x = math.random(10, Width - 10),
+--         y = 10,
+--         v_x = math.random(),
+--         v_y = math.random()
+--     })
+-- end
+
 function handleBounds(obj)
     if obj.x < 0 then
         obj.x = 0
@@ -72,26 +77,34 @@ function handleBounds(obj)
         obj.x = Width-obj.radius
         obj.v_x = (-1/obj.mass) * obj.v_x
     end
-    if obj.y < 0 then
-        obj.y = 0
-        obj.v_y = (-1/obj.mass) * obj.v_y
-    end
-    if obj.y > Height-obj.radius then
-        obj.y = Height-obj.radius
-        obj.v_y = (-1/obj.mass) * obj.v_y
-    end
+    -- if obj.y < 0 then
+    --     obj.y = 0
+    --     obj.v_y = (-1/obj.mass) * obj.v_y
+    -- end
+    -- if obj.y > Height-obj.radius then
+    --     obj.y = Height-obj.radius
+    --     obj.v_y = (-1/obj.mass) * obj.v_y
+    -- end
+end
+
+function applyJump(obj)
+    obj.v_y = obj.v_y -1
 end
 
 function love.update(dt)
-    if Input.active then return end
     for i = 0, Letters.length-1, 1 do
         local l = Letters.items[i]
         -- w, a ,s, d controls
-        handleMoveXY(l, 0.5)
+        -- if not Input.active then handleMoveXY(l, 0.5) end
         -- gravity
         applyAccY(l, 0.3)
+        -- if math.random() > 0.9 then applyJump(l) end
         applyVelocity(l)
         handleBounds(l)
+        -- remove at bottom
+        if l.y > Height then
+            Letters.remove(i)
+        end
     end
 end
 
@@ -101,5 +114,5 @@ function love.draw()
         love.graphics.print(l.val, l.x, l.y)
     end
 
-    if Input.active then love.graphics.print('inputting', Width/2, Height/2) end
+    -- if Input.active then love.graphics.print('inputting', Width/2, Height/2) end
 end

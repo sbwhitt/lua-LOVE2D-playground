@@ -7,7 +7,7 @@ local colors = {
     cyan = {0, 1, 1},
     orange = {1, 0.66, 0},
     purple = {0.66, 0, 1},
-    brown = {0.75, 0.66, 0},
+    brown = {0.66, 0.5, 0},
     white = {1, 1, 1},
     gray = {0.75, 0.75, 0.75}
 }

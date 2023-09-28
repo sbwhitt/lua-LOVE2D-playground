@@ -1,5 +1,5 @@
 local input = {
-    active = false,
+    active = true,
     length = 0
 }
 

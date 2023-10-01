@@ -6,6 +6,9 @@ List = require('list')
 Input = require('input')
 Alpha = require('alpha')
 Colors = require('colors')
+Tick = require('tick')
+
+CurrentInput = Input.new()
 
 function love.load()
     local _, _, flags = love.window.getMode()
@@ -13,22 +16,44 @@ function love.load()
     love.window.setMode(Width, Height)
 
     Letters = List.new()
+    Inputs = List.new()
 end
 
 function love.keypressed(key, scancode, isrepeat)
     if key == 'escape' then
         love.event.quit()
     end
-    if Alpha[key] then
-        Letters.add({
-            val = Alpha[key],
-            radius = 16,
-            mass = math.random(2, 5),
-            x = math.random(10, Width - 10),
-            y = 10,
-            v_x = math.random(),
-            v_y = math.random()
-        })
+    -- if Alpha[key] then
+    --     Letters.add({
+    --         val = Alpha[key],
+    --         radius = 16,
+    --         mass = math.random(2, 5),
+    --         x = math.random(10, Width - 10),
+    --         y = 10,
+    --         v_x = math.random(),
+    --         v_y = math.random()
+    --     })
+    -- end
+end
+
+function handleActiveKeys(keys, currentInput)
+    for k, v in pairs(keys) do
+        if love.keyboard.isDown(k) then
+            v.active = true
+            local l = {
+                val = Alpha[k],
+                radius = 16,
+                mass = math.random(2, 5),
+                x = 10,
+                y = 10,
+                v_x = math.random(),
+                v_y = math.random()
+            }
+        currentInput.addLetter(l)
+        Letters.add(l)
+        else
+            v.active = false
+        end
     end
 end
 
@@ -56,18 +81,6 @@ function applyVelocity(obj)
     obj.y = obj.y + obj.v_y
 end
 
--- function addRandLetter(key)
---     Letters.add({
---         val = Alpha[key],
---         radius = 16,
---         mass = math.random(2, 5),
---         x = math.random(10, Width - 10),
---         y = 10,
---         v_x = math.random(),
---         v_y = math.random()
---     })
--- end
-
 function handleBounds(obj)
     if obj.x < 0 then
         obj.x = 0
@@ -77,14 +90,14 @@ function handleBounds(obj)
         obj.x = Width-obj.radius
         obj.v_x = (-1/obj.mass) * obj.v_x
     end
-    -- if obj.y < 0 then
-    --     obj.y = 0
-    --     obj.v_y = (-1/obj.mass) * obj.v_y
-    -- end
-    -- if obj.y > Height-obj.radius then
-    --     obj.y = Height-obj.radius
-    --     obj.v_y = (-1/obj.mass) * obj.v_y
-    -- end
+    if obj.y < 0 then
+        obj.y = 0
+        obj.v_y = (-1/obj.mass) * obj.v_y
+    end
+    if obj.y > Height-obj.radius then
+        obj.y = Height-obj.radius
+        obj.v_y = (-1/obj.mass) * obj.v_y
+    end
 end
 
 function applyJump(obj)
@@ -92,8 +105,18 @@ function applyJump(obj)
 end
 
 function love.update(dt)
+    CurrentInput.update(dt)
+    if not CurrentInput.active then
+        CurrentInput.stop()
+        local i = Input.new()
+        Inputs.add(i)
+        CurrentInput = i
+    end
+
+    if Tick.check(dt, 0.1) then handleActiveKeys(Alpha, CurrentInput) end
+
     for i = 0, Letters.length-1, 1 do
-        local l = Letters.items[i]
+        local l = Letters.items[i]        
         -- w, a ,s, d controls
         -- if not Input.active then handleMoveXY(l, 0.5) end
         -- gravity
@@ -108,11 +131,18 @@ function love.update(dt)
     end
 end
 
+function drawCurrentInput()
+    for i=0, CurrentInput.letters.length-1, 1 do
+        love.graphics.print(CurrentInput.letters.items[i].val, Width/2 + (i * 12), 10)
+    end
+end
+
 function love.draw()
     for i = 0, Letters.length-1, 1 do
         local l = Letters.items[i]
         love.graphics.print(l.val, l.x, l.y)
     end
 
+    drawCurrentInput()
     -- if Input.active then love.graphics.print('inputting', Width/2, Height/2) end
 end

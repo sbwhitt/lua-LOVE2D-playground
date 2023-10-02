@@ -6,9 +6,7 @@ List = require('list')
 Input = require('input')
 Alpha = require('alpha')
 Colors = require('colors')
-Tick = require('tick')
-
-CurrentInput = Input.new()
+Timer = require('timer')
 
 function love.load()
     local _, _, flags = love.window.getMode()
@@ -17,6 +15,8 @@ function love.load()
 
     Letters = List.new()
     Inputs = List.new()
+    TypeTimer = Timer.new()
+    CurrentInput = Input.new()
 end
 
 function love.keypressed(key, scancode, isrepeat)
@@ -36,7 +36,8 @@ function love.keypressed(key, scancode, isrepeat)
     -- end
 end
 
-function handleActiveKeys(keys, currentInput)
+function handleActiveKeys(keys, CurrentInput)
+    local typing = false
     for k, v in pairs(keys) do
         if love.keyboard.isDown(k) then
             v.active = true
@@ -49,12 +50,14 @@ function handleActiveKeys(keys, currentInput)
                 v_x = math.random(),
                 v_y = math.random()
             }
-        currentInput.addLetter(l)
+        CurrentInput.addLetter(l)
         Letters.add(l)
+        typing = true
         else
             v.active = false
         end
     end
+    return typing
 end
 
 function handleMoveXY(obj, amount)
@@ -104,7 +107,7 @@ function applyJump(obj)
     obj.v_y = obj.v_y -1
 end
 
-function love.update(dt)
+function updateCurrentInput(dt)
     CurrentInput.update(dt)
     if not CurrentInput.active then
         CurrentInput.stop()
@@ -112,8 +115,16 @@ function love.update(dt)
         Inputs.add(i)
         CurrentInput = i
     end
+end
 
-    if Tick.check(dt, 0.1) then handleActiveKeys(Alpha, CurrentInput) end
+function love.update(dt)
+    if TypeTimer.check(dt, 0.13) then
+        if not handleActiveKeys(Alpha, CurrentInput) then
+            updateCurrentInput(dt)
+        else
+            CurrentInput.timer.reset()
+        end
+    end
 
     for i = 0, Letters.length-1, 1 do
         local l = Letters.items[i]        

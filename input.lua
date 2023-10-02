@@ -1,4 +1,5 @@
 List = require('list')
+Timer = require('timer')
 
 local input = {}
 
@@ -8,7 +9,7 @@ function input.new()
     i.active = true
     i.length = 0
     i.letters = List.new()
-    i.tick = require('tick')
+    i.timer = Timer.new()
 
     i.addLetter = function (l)
         i.letters.add(l)
@@ -16,7 +17,9 @@ function input.new()
     end
 
     i.update = function (dt)
-        if i.tick.check(dt, 0.5) then i.active = false end
+        if i.timer.check(dt, 0.5) then
+            i.active = false
+        end
     end
 
     i.stop = function ()
